@@ -2,7 +2,7 @@
 
 Codebase for learning to play Atari from demonstrations. Contrary to other work on learning from demonstrations we learn to maximize the score using pure RL, rather than trying to imitate the demo.
 
-All learning is done through RL on the regular Atari environments, but we automatically build a curriculum for our agent by starting the rollouts from points in a demonstration provided by a human expert: We start by having each RL episode begin near the end of the demonstration. Once the agent is able to beat or at least tie the score of the demonstrator on the remaining part of the game, in at least 20\% of the rollouts, we slowly move the starting point back in time. We keep doing this until the agent is playing from the start of the game, without using the demo at all, at which point we have an RL-trained agent beating or tying the human expert on the entire game.
+All learning is done through RL on the regular Atari environments, but we automatically build a curriculum for our agent by starting the rollouts from points in a demonstration provided by a human expert: We start by having each RL episode begin near the end of the demonstration. Once the agent is able to beat or at least tie the score of the demonstrator on the remaining part of the game in at least 20% of the rollouts, we slowly move the starting point back in time. We keep doing this until the agent is playing from the start of the game, without using the demo at all, at which point we have an RL-trained agent beating or tying the human expert on the entire game.
 
 ![](graphics/montezuma.png)
 
@@ -14,7 +14,11 @@ When resetting to a state from the demonstration and when using recurrent polici
 
 # PPO implementation
 
-Our PPO implementation is derived from the one in [OpenAI Baselines](https://github.com/openai/baselines). We use [generalized advantage estimation](https://arxiv.org/abs/1506.02438v5) with a lambda of 0.95 and gamma between 0.999 and 0.9999. For every minibatch we process during training we recompute the hidden state of our policy at the start of that minibatch, rather than just using the value we had computed using the previous set of parameters: effectively this comes down to using a larger minibatch in the time dimension, and throwing away the first part of the batch when calculating the value loss and policy loss.
+Our PPO implementation is derived from the one in [OpenAI Baselines](https://github.com/openai/baselines). We use [generalized advantage estimation](https://arxiv.org/abs/1506.02438v5) with a gamma of 0.999 and a lambda of 0.95. For every minibatch we process during training we recompute the hidden state of our policy at the start of that minibatch, rather than just using the value we had computed using the previous set of parameters: effectively this comes down to using a larger minibatch in the time dimension, and throwing away the first part of the batch when calculating the value loss and policy loss.
+
+# The policy
+
+Rather than use the standard LSTM policy for Atari, we use an architecture based on causal convolutions across the time dimension, similar to the [wavenet](https://arxiv.org/abs/1609.03499) model for audio generation. To keep the computational cost manageable we use [depth-wise separable convolutions](https://arxiv.org/abs/1610.02357v3) in the spatial domain. Since we are moving the starting point of the episodes back in time during training, we want to explore more from these early states than from the states later on in the game: to accomplish this we have the policy increase the entropy for the first few steps of each episode.
 
 # How to use
 
@@ -30,8 +34,6 @@ alt="Our agent playing Montezuma’s Revenge" width="500" border="10" /></a>
 </p>
 
 *Our agent playing Montezuma’s Revenge. The agent achieves a final score of 74,500 over approximately 12 minutes of play (video is double speed). Although much of the agent’s game mirrors the demonstration, the agent surpasses the demonstration score of 71,500 by picking up more diamonds along the way. In addition, the agent learns to exploit a flaw in the emulator to make a key re-appear at minute 4:25 of the video, something not present in the demonstration.*
-
-The trained model for Montezuma's Revenge can be downloaded [here](https://www.dropbox.com/s/nr4jmjcpsrrsgwf/003100?dl=1).
 
 # Remaining challenges
 
