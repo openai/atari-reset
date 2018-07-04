@@ -243,6 +243,15 @@ def learn(policy, env, nsteps, total_timesteps, ent_coef=1e-4, lr=1e-4,
                             [epinfo['as_good_as_demo'] for epinfo in epinfos_to_report]))
                         logger.logkv('perc_started_below_max_sp', safemean(
                             [epinfo['starting_point'] <= env.max_starting_point for epinfo in epinfos_to_report]))
+                    elif hasattr(env.venv, 'max_starting_point'):
+                        logger.logkv('max_starting_point', env.venv.max_starting_point)
+                        logger.logkv('as_good_as_demo_start', safemean(
+                            [epinfo['as_good_as_demo'] for epinfo in epinfos_to_report if
+                             epinfo['starting_point'] <= env.venv.max_starting_point]))
+                        logger.logkv('as_good_as_demo_all', safemean(
+                            [epinfo['as_good_as_demo'] for epinfo in epinfos_to_report]))
+                        logger.logkv('perc_started_below_max_sp', safemean(
+                            [epinfo['starting_point'] <= env.venv.max_starting_point for epinfo in epinfos_to_report]))
 
                 logger.logkv('time_elapsed', tnow - tfirststart)
                 logger.logkv('perc_valid', np.mean(valids))

@@ -7,6 +7,7 @@ import imageio
 import numpy as np
 from multiprocessing import Process, Pipe
 import mpi4py.rc
+import horovod.tensorflow as hvd
 mpi4py.rc.initialize = False
 from mpi4py import MPI
 
@@ -392,15 +393,14 @@ class ResetManager(MyWrapper):
         super(ResetManager, self).__init__(env)
         starting_points = self.env.recursive_getattr('starting_point')
         all_starting_points = flatten_lists(MPI.COMM_WORLD.allgather(starting_points))
-        self.min_starting_point = max(all_starting_points)
+        self.min_starting_point = min(all_starting_points)
         self.max_starting_point = max(all_starting_points)
         self.nrstartsteps = self.max_starting_point - self.min_starting_point
+        assert(self.nrstartsteps > 10)
         self.max_max_starting_point = self.max_starting_point
         self.starting_point_success = np.zeros(self.max_starting_point+10000)
         self.counter = 0
         self.infos = []
-        if isinstance(self.nrstartsteps, list):
-            self.nrstartsteps = self.nrstartsteps[0]
 
     def proc_infos(self):
         epinfos = [info['episode'] for info in self.infos if 'episode' in info]

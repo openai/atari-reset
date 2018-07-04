@@ -49,7 +49,7 @@ def train(game_name, policy, num_timesteps, lr, entropy_coef, load_path, startin
         env.set_max_starting_point(starting_point)
 
     policy = {'cnn' : CnnPolicy, 'gru': GRUPolicy}[policy]
-    learn(policy=policy, env=env, nsteps=128, lam=.95, gamma=.9995, noptepochs=4, log_interval=1, save_interval=100,
+    learn(policy=policy, env=env, nsteps=128, lam=.95, gamma=.999, noptepochs=4, log_interval=1, save_interval=100,
           ent_coef=entropy_coef, l2_coef=1e-7, lr=lr, cliprange=0.1, total_timesteps=num_timesteps,
           norm_adv=True, load_path=load_path, save_path=save_path, game_name=game_name)
 
