@@ -1,3 +1,5 @@
+**Status:** Archive (code is provided as-is, no updates expected)
+
 # Learn RL policies on Atari by resetting from a demonstration
 
 Codebase for learning to play Atari from demonstrations. Contrary to other work on learning from demonstrations we learn to maximize the score using pure RL, rather than trying to imitate the demo.
